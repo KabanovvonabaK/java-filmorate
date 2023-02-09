@@ -194,6 +194,7 @@ class UserControllerTest {
     }
 
     @Test
+    @Order(12)
     void updateUserTest() {
         User userForAnUpdate = User.builder()
                 .id(1)
@@ -204,12 +205,14 @@ class UserControllerTest {
                 .build();
 
         restTemplate.put(getUrl(), userForAnUpdate, User.class);
-        assertEquals("{id=2, email=email@yandex.ru, login=login, name=login, birthday=2000-01-01}",
+        System.out.println(restTemplate.getForObject(getUrl(), List.class));
+        assertEquals("{id=1, email=newEmail@yandex.ru, login=newLogin, name=newName, birthday=2001-01-01}",
                 restTemplate.getForObject(getUrl(),
-                        List.class).get(0).toString());
+                        List.class).get(2).toString());
     }
 
     @Test
+    @Order(13)
     void updateUserUnknownTest() {
         User userForAnUpdate = User.builder()
                 .id(2)
@@ -225,6 +228,7 @@ class UserControllerTest {
     }
 
     @Test
+    @Order(14)
     void getUsersTest() {
         User user = User.builder()
                 .email("email@yandex.ru")

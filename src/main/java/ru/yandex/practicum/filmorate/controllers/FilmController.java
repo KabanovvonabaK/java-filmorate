@@ -21,6 +21,13 @@ public class FilmController {
     private List<Film> films = new ArrayList<>();
     private int filmId = 1;
 
+    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
+    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final Date NOT_OLDER = Date.valueOf(LocalDate.parse("1895-12-28").format(DATE_TIME_FORMATTER));
+
+    private static final int MAX_DESCRIPTION_LENGTH = 200;
+
     @GetMapping
     public List<Film> getFilmList() {
         return films;
@@ -52,12 +59,11 @@ public class FilmController {
     }
 
     private boolean filmValidation(Film film) {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        Date notOlder = Date.valueOf(LocalDate.parse("1895-12-28").format(dateTimeFormatter));
-        if (film.getDescription().length() > 200) {
-            log.error("Film description length should be less than 200 symbols");
-            throw new ValidationException("Film description length should be less than 200 symbols");
-        } else if (film.getReleaseDate().before(notOlder)) {
+        if (film.getDescription().length() > MAX_DESCRIPTION_LENGTH) {
+            log.error("Film description length should be less than " + MAX_DESCRIPTION_LENGTH + " symbols");
+            throw new ValidationException("Film description length should be less than " +
+                    MAX_DESCRIPTION_LENGTH + " symbols");
+        } else if (film.getReleaseDate().before(NOT_OLDER)) {
             log.error("Film can not be earlier than 28.12.1895: {}", film.toString());
             throw new ValidationException("Film can not be earlier than 28.12.1895");
         } else {
@@ -71,7 +77,6 @@ public class FilmController {
     }
 
     private void formatReleaseDate(Film film) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        film.setReleaseDate((Date.valueOf(sdf.format(film.getReleaseDate()))));
+        film.setReleaseDate((Date.valueOf(SIMPLE_DATE_FORMAT.format(film.getReleaseDate()))));
     }
 }
