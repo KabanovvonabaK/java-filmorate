@@ -47,14 +47,13 @@ public class UserController {
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        if (users.contains(user)) {
-            users.remove(user);
-            formatBirthday(user);
-            users.add(user);
-            log.info("USER SUCCESSFULLY UPDATED: " + user.toString());
-        } else {
+        if (!users.contains(user)) {
             throw new ValidationException("User with such id " + user.getId() + " don't exist");
         }
+        users.remove(user);
+        formatBirthday(user);
+        users.add(user);
+        log.info("USER SUCCESSFULLY UPDATED: " + user.toString());
         return user;
     }
 

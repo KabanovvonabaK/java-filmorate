@@ -35,30 +35,6 @@ public class FilmController {
 
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
-        if (filmValidation(film)) {
-            film.setId(filmId);
-            filmId++;
-            formatReleaseDate(film);
-            films.add(film);
-            log.info("FILM SUCCESSFULLY ADDED: {}", film.toString());
-        }
-        return film;
-    }
-
-    @PutMapping
-    public Film updateFilm(@Valid @RequestBody Film film) {
-        if (films.contains(film)) {
-            films.remove(film);
-            formatReleaseDate(film);
-            films.add(film);
-            log.info("FILM SUCCESSFULLY UPDATED: " + film.toString());
-        } else {
-            throw new ValidationException("Film with such id " + film.getId() + " don't exist");
-        }
-        return film;
-    }
-
-    private boolean filmValidation(Film film) {
         if (film.getDescription().length() > MAX_DESCRIPTION_LENGTH) {
             log.error("Film description length should be less than " + MAX_DESCRIPTION_LENGTH + " symbols");
             throw new ValidationException("Film description length should be less than " +
@@ -66,9 +42,26 @@ public class FilmController {
         } else if (film.getReleaseDate().before(NOT_OLDER)) {
             log.error("Film can not be earlier than 28.12.1895: {}", film.toString());
             throw new ValidationException("Film can not be earlier than 28.12.1895");
-        } else {
-            return true;
         }
+        setFilmId(film);
+        formatReleaseDate(film);
+        films.add(film);
+        log.info("FILM SUCCESSFULLY ADDED: {}", film.toString());
+
+        return film;
+    }
+
+    @PutMapping
+    public Film updateFilm(@Valid @RequestBody Film film) {
+        if (!films.contains(film)) {
+            throw new ValidationException("Film with such id " + film.getId() + " don't exist");
+        }
+        films.remove(film);
+        formatReleaseDate(film);
+        films.add(film);
+        log.info("FILM SUCCESSFULLY UPDATED: " + film.toString());
+
+        return film;
     }
 
     private void setFilmId(Film film) {
