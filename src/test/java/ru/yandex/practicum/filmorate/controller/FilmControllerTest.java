@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.controllers;
+package ru.yandex.practicum.filmorate.controller;
 
 import net.bytebuddy.utility.RandomString;
 import org.junit.jupiter.api.MethodOrderer;
@@ -132,7 +132,8 @@ class FilmControllerTest {
                 .build();
 
         restTemplate.put(getUrl(), filmForAnUpdate, Film.class);
-        assertEquals("{id=1, name=newName, description=newDescription, releaseDate=2001-01-01, duration=2.0}",
+        assertEquals("{id=1, name=newName, description=newDescription, " +
+                        "releaseDate=2001-01-01, duration=2.0, rate=0}",
                 restTemplate.getForObject(getUrl(),
                         List.class).get(0).toString());
     }

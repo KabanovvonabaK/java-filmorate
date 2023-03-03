@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.controllers;
+package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -206,7 +206,8 @@ class UserControllerTest {
 
         restTemplate.put(getUrl(), userForAnUpdate, User.class);
         System.out.println(restTemplate.getForObject(getUrl(), List.class));
-        assertEquals("{id=1, email=newEmail@yandex.ru, login=newLogin, name=newName, birthday=2001-01-01}",
+        assertEquals("{id=1, email=newEmail@yandex.ru, login=newLogin, name=newName, " +
+                        "birthday=2001-01-01, friends=null, likedFilms=[]}",
                 restTemplate.getForObject(getUrl(),
                         List.class).get(2).toString());
     }
