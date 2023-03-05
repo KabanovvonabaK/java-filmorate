@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.exceptions;
 
 public class UserCantBeFriendToHimself extends RuntimeException {
 
-    int userId;
+    private final int userId;
 
     public UserCantBeFriendToHimself(int userId) {
         this.userId = userId;

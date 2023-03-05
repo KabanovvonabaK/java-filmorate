@@ -1,8 +1,8 @@
 package ru.yandex.practicum.filmorate.exceptions;
 
 public class UserAlreadyLikedFilm extends RuntimeException {
-    int filmId;
-    int userId;
+    private final int filmId;
+    private final int userId;
 
     public UserAlreadyLikedFilm(int filmId, int userId) {
         this.filmId = filmId;

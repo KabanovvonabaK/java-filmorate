@@ -25,40 +25,18 @@ public class User {
     private String name;
     @PastOrPresent
     private Date birthday;
-    private Set<Integer> friends;
-    private Set<Integer> likedFilms;
+    private final Set<Integer> friends = new HashSet<>();
+    private final Set<Integer> likedFilms = new HashSet<>();
 
     public void addFriend(int id) {
-        if (friends == null) {
-            friends = new HashSet<>();
-        }
         friends.add(id);
     }
 
     public void removeFriend(int id) {
-        if (friends != null) {
-            friends.remove(id);
-        }
+        friends.remove(id);
     }
 
     public Set<Integer> getLikedFilms() {
-        if (likedFilms == null) {
-            likedFilms = new HashSet<>();
-        }
         return likedFilms;
-    }
-
-    public void addLike(int filmId) {
-        if (likedFilms == null) {
-            likedFilms = new HashSet<>();
-        }
-        likedFilms.add(filmId);
-    }
-
-    public void removeLike(int filmId) {
-        if (likedFilms == null) {
-            likedFilms = new HashSet<>();
-        }
-        likedFilms.remove(filmId);
     }
 }

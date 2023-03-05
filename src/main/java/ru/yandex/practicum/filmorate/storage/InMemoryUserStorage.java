@@ -14,14 +14,14 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class InMemoryUserStorage implements UserStorage {
+public class InMemoryUserStorage implements Storage<User> {
 
     private final List<User> users = new ArrayList<>();
     private int userId = 1;
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
-    public User addUser(User user) {
+    public User create(User user) {
         if (user.getLogin().contains(" ")) {
             log.error("User login can not be empty, null or contain space symbol(s): {}", user);
             throw new ValidationException("User login can not be empty, null or contain space symbol(s)");
@@ -39,7 +39,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User updateUser(User user) {
+    public User update(User user) {
         if (!users.contains(user)) {
             throw new ValidationException("User with such id " + user.getId() + " don't exist");
         }
@@ -51,7 +51,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User findUser(int id) {
+    public User findById(int id) {
         if (checkUserExistById(id)) {
             log.info(String.format("User with id %s was requested", id));
             return users.stream().filter(x -> x.getId() == id).findFirst().get();
@@ -62,7 +62,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public List<User> getAllUsers() {
+    public List<User> findAll() {
         return users;
     }
 

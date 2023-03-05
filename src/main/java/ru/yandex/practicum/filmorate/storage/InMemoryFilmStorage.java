@@ -15,7 +15,7 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class InMemoryFilmStorage implements FilmStorage {
+public class InMemoryFilmStorage implements Storage<Film> {
 
     private final List<Film> films = new ArrayList<>();
     private int filmId = 1;
@@ -26,9 +26,9 @@ public class InMemoryFilmStorage implements FilmStorage {
 
 
     @Override
-    public Film addFilm(Film film) {
+    public Film create(Film film) {
         if (film.getDescription().length() > MAX_DESCRIPTION_LENGTH) {
-            log.error("Film description length should be less than " + MAX_DESCRIPTION_LENGTH + " symbols");
+            log.error("Film description length should be less than {} symbols", MAX_DESCRIPTION_LENGTH);
             throw new ValidationException("Film description length should be less than " +
                     MAX_DESCRIPTION_LENGTH + " symbols");
         } else if (film.getReleaseDate().before(NOT_OLDER)) {
@@ -44,7 +44,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film updateFilm(Film film) {
+    public Film update(Film film) {
         if (!films.contains(film)) {
             throw new ValidationException("Film with such id " + film.getId() + " don't exist");
         }
@@ -57,7 +57,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film getFilmById(int id) {
+    public Film findById(int id) {
         for (Film film : films) {
             if (film.getId() == id) {
                 return film;
@@ -67,7 +67,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getAllFilms() {
+    public List<Film> findAll() {
         return films;
     }
 
