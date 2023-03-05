@@ -20,4 +20,5 @@ public class Film {
     private Date releaseDate;
     @Positive
     private double duration;
+    private int rate;
 }
