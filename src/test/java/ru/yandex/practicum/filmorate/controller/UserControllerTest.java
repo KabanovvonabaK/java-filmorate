@@ -206,8 +206,8 @@ class UserControllerTest {
 
         restTemplate.put(getUrl(), userForAnUpdate, User.class);
         System.out.println(restTemplate.getForObject(getUrl(), List.class));
-        assertEquals("{id=1, email=newEmail@yandex.ru, login=newLogin, name=newName, " +
-                        "birthday=2001-01-01, friends=null, likedFilms=[]}",
+        assertEquals("{id=1, email=newEmail@yandex.ru, login=newLogin, name=newName, birthday=2001-01-01, " +
+                        "friends=[], likedFilms=[]}",
                 restTemplate.getForObject(getUrl(),
                         List.class).get(2).toString());
     }

@@ -30,7 +30,7 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleUserAlreadyLikedFilm(final UserAlreadyLikedFilm e) {
         return new ErrorResponse(String.format("User with id %s already liked film with id %s",
                 e.getUserId(), e.getFilmId()));
