@@ -1,6 +1,6 @@
 # java-filmorate
-![](../../../Downloads/Untitled.png)
-
+https://dbdiagram.io/d/64170640296d97641d890f97
+![](DBSchemeDiagram.png)
 *Примеры запросов:* за основу взяты фильмы, для пользователей будет очень похоже
 1. Все фильмы SELECT * FROM Films;
 2. Найти фильм по id SELECT * FROM Films WHERE film_id = id;
