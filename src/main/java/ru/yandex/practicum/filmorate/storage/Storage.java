@@ -9,6 +9,5 @@ public interface Storage<T> {
     T update(T entity);
 
     T findById(int id);
-    
     List<T> findAll();
 }
