@@ -25,12 +25,12 @@ public class MpaController {
     }
 
     @PostMapping
-    public Mpa create(@RequestBody Mpa Mpa) {
-        return mpaService.create(Mpa);
+    public Mpa create(@RequestBody Mpa mpa) {
+        return mpaService.create(mpa);
     }
 
     @PutMapping
-    public Mpa update(@RequestBody Mpa Mpa) {
-        return mpaService.update(Mpa);
+    public Mpa update(@RequestBody Mpa mpa) {
+        return mpaService.update(mpa);
     }
 }
