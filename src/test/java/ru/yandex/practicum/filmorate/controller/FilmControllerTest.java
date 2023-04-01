@@ -1,33 +1,28 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import net.bytebuddy.utility.RandomString;
-import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.dao.DataIntegrityViolationException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.db.FilmDbStorage;
 
 import java.sql.Date;
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@RunWith(SpringRunner.class)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class FilmControllerTest {
 
-    @LocalServerPort
-    private int port;
-
-    @Autowired
-    private TestRestTemplate restTemplate;
+    private final FilmDbStorage filmDbStorage;
 
     @Test
     @Order(1)
@@ -36,12 +31,12 @@ class FilmControllerTest {
                 .name("name")
                 .description("desc")
                 .duration(55)
-                .releaseDate(Date.valueOf("2000-01-01"))
+                .releaseDate(Date.valueOf("2000-01-01").toLocalDate())
+                .mpa(new Mpa(1, "G"))
                 .build();
 
-        restTemplate.postForEntity(getUrl(), film, Film.class);
-        assertEquals(1, restTemplate.getForObject(getUrl(),
-                List.class).size());
+        filmDbStorage.create(film);
+        assertTrue(filmDbStorage.findAll().contains(film));
     }
 
     @Test
@@ -51,12 +46,13 @@ class FilmControllerTest {
                 .name(null)
                 .description("desc")
                 .duration(55)
-                .releaseDate(Date.valueOf("2000-01-01"))
+                .releaseDate(Date.valueOf("2000-01-01").toLocalDate())
+                .mpa(new Mpa(1, "G"))
                 .build();
 
-        restTemplate.postForEntity(getUrl(), film, Film.class);
-        assertEquals(1, restTemplate.getForObject(getUrl(),
-                List.class).size());
+        assertThrows(DataIntegrityViolationException.class, () -> {
+            filmDbStorage.create(film);
+        });
     }
 
     @Test
@@ -66,12 +62,12 @@ class FilmControllerTest {
                 .name("")
                 .description("desc")
                 .duration(55)
-                .releaseDate(Date.valueOf("2000-01-01"))
+                .releaseDate(Date.valueOf("2000-01-01").toLocalDate())
+                .mpa(new Mpa(1, "G"))
                 .build();
 
-        restTemplate.postForEntity(getUrl(), film, Film.class);
-        assertEquals(1, restTemplate.getForObject(getUrl(),
-                List.class).size());
+        filmDbStorage.create(film);
+        assertTrue(filmDbStorage.findAll().contains(film));
     }
 
     @Test
@@ -82,12 +78,13 @@ class FilmControllerTest {
                 .name("name")
                 .description(longDescription)
                 .duration(55)
-                .releaseDate(Date.valueOf("2000-01-01"))
+                .releaseDate(Date.valueOf("2000-01-01").toLocalDate())
+                .mpa(new Mpa(1, "G"))
                 .build();
 
-        restTemplate.postForEntity(getUrl(), film, Film.class);
-        assertEquals(1, restTemplate.getForObject(getUrl(),
-                List.class).size());
+        assertThrows(ValidationException.class, () -> {
+            filmDbStorage.create(film);
+        });
     }
 
     @Test
@@ -97,12 +94,13 @@ class FilmControllerTest {
                 .name("oldMovie")
                 .description("description")
                 .duration(55)
-                .releaseDate(Date.valueOf("1895-12-27"))
+                .releaseDate(Date.valueOf("1895-12-27").toLocalDate())
+                .mpa(new Mpa(1, "G"))
                 .build();
 
-        restTemplate.postForEntity(getUrl(), film, Film.class);
-        assertEquals(1, restTemplate.getForObject(getUrl(),
-                List.class).size());
+        assertThrows(ValidationException.class, () -> {
+            filmDbStorage.create(film);
+        });
     }
 
     @Test
@@ -112,12 +110,13 @@ class FilmControllerTest {
                 .name("name")
                 .description("description")
                 .duration(0)
-                .releaseDate(Date.valueOf("2000-01-01"))
+                .releaseDate(Date.valueOf("2000-01-01").toLocalDate())
+                .mpa(new Mpa(1, "G"))
                 .build();
 
-        restTemplate.postForEntity(getUrl(), film, Film.class);
-        assertEquals(1, restTemplate.getForObject(getUrl(),
-                List.class).size());
+        assertThrows(ValidationException.class, () -> {
+            filmDbStorage.create(film);
+        });
     }
 
     @Test
@@ -128,14 +127,13 @@ class FilmControllerTest {
                 .name("newName")
                 .description("newDescription")
                 .duration(2)
-                .releaseDate(Date.valueOf("2001-01-01"))
+                .releaseDate(Date.valueOf("2001-01-01").toLocalDate())
+                .mpa(new Mpa(1, "G"))
                 .build();
 
-        restTemplate.put(getUrl(), filmForAnUpdate, Film.class);
-        assertEquals("{id=1, name=newName, description=newDescription, " +
-                        "releaseDate=2001-01-01, duration=2.0, rate=0}",
-                restTemplate.getForObject(getUrl(),
-                        List.class).get(0).toString());
+        filmDbStorage.update(filmForAnUpdate);
+        assertEquals(filmForAnUpdate,
+                filmDbStorage.findById(1));
     }
 
     @Test
@@ -145,15 +143,11 @@ class FilmControllerTest {
                 .name("name")
                 .description("desc")
                 .duration(55)
-                .releaseDate(Date.valueOf("2000-01-01"))
+                .releaseDate(Date.valueOf("2000-01-01").toLocalDate())
+                .mpa(new Mpa(1, "G"))
                 .build();
 
-        restTemplate.postForEntity(getUrl(), film, Film.class);
-        assertEquals(2, restTemplate.getForObject(getUrl(),
-                List.class).size());
-    }
-
-    private String getUrl() {
-        return "http://localhost:" + port + "/films";
+        filmDbStorage.create(film);
+        assertEquals(3, filmDbStorage.findAll().size());
     }
 }

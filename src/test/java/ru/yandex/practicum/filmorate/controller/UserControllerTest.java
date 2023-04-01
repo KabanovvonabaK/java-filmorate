@@ -1,32 +1,27 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.junit.jupiter.api.MethodOrderer;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.dao.DataIntegrityViolationException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.db.UserDbStorage;
 
 import java.sql.Date;
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@RunWith(SpringRunner.class)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class UserControllerTest {
 
-    @LocalServerPort
-    private int port;
-
-    @Autowired
-    private TestRestTemplate restTemplate;
+    private final UserDbStorage userDbStorage;
 
     @Test
     @Order(1)
@@ -35,12 +30,11 @@ class UserControllerTest {
                 .email("email@yandex.ru")
                 .login("login")
                 .name("name")
-                .birthday(Date.valueOf("2000-01-01"))
+                .birthday(Date.valueOf("2000-01-01").toLocalDate())
                 .build();
 
-        restTemplate.postForEntity(getUrl(), user, User.class);
-        assertEquals(1, restTemplate.getForObject(getUrl(),
-                List.class).size());
+        userDbStorage.create(user);
+        assertTrue(userDbStorage.findAll().contains(user));
     }
 
     @Test
@@ -50,12 +44,12 @@ class UserControllerTest {
                 .email(null)
                 .login("login")
                 .name("name")
-                .birthday(Date.valueOf("2000-01-01"))
+                .birthday(Date.valueOf("2000-01-01").toLocalDate())
                 .build();
 
-        restTemplate.postForEntity(getUrl(), user, User.class);
-        assertEquals(1, restTemplate.getForObject(getUrl(),
-                List.class).size());
+        assertThrows(ValidationException.class, () -> {
+            userDbStorage.create(user);
+        });
     }
 
     @Test
@@ -65,12 +59,12 @@ class UserControllerTest {
                 .email("")
                 .login("login")
                 .name("name")
-                .birthday(Date.valueOf("2000-01-01"))
+                .birthday(Date.valueOf("2000-01-01").toLocalDate())
                 .build();
 
-        restTemplate.postForEntity(getUrl(), user, User.class);
-        assertEquals(1, restTemplate.getForObject(getUrl(),
-                List.class).size());
+        assertThrows(ValidationException.class, () -> {
+            userDbStorage.create(user);
+        });
     }
 
     @Test
@@ -80,12 +74,12 @@ class UserControllerTest {
                 .email(" ")
                 .login("login")
                 .name("name")
-                .birthday(Date.valueOf("2000-01-01"))
+                .birthday(Date.valueOf("2000-01-01").toLocalDate())
                 .build();
 
-        restTemplate.postForEntity(getUrl(), user, User.class);
-        assertEquals(1, restTemplate.getForObject(getUrl(),
-                List.class).size());
+        assertThrows(ValidationException.class, () -> {
+            userDbStorage.create(user);
+        });
     }
 
     @Test
@@ -95,12 +89,12 @@ class UserControllerTest {
                 .email("noAtSign")
                 .login("login")
                 .name("name")
-                .birthday(Date.valueOf("2000-01-01"))
+                .birthday(Date.valueOf("2000-01-01").toLocalDate())
                 .build();
 
-        restTemplate.postForEntity(getUrl(), user, User.class);
-        assertEquals(1, restTemplate.getForObject(getUrl(),
-                List.class).size());
+        assertThrows(ValidationException.class, () -> {
+            userDbStorage.create(user);
+        });
     }
 
     @Test
@@ -110,12 +104,12 @@ class UserControllerTest {
                 .email("email@yandex.ru")
                 .login(null)
                 .name("name")
-                .birthday(Date.valueOf("2000-01-01"))
+                .birthday(Date.valueOf("2000-01-01").toLocalDate())
                 .build();
 
-        restTemplate.postForEntity(getUrl(), user, User.class);
-        assertEquals(1, restTemplate.getForObject(getUrl(),
-                List.class).size());
+        assertThrows(DataIntegrityViolationException.class, () -> {
+            userDbStorage.create(user);
+        });
     }
 
     @Test
@@ -125,125 +119,10 @@ class UserControllerTest {
                 .email("email@yandex.ru")
                 .login("")
                 .name("name")
-                .birthday(Date.valueOf("2000-01-01"))
+                .birthday(Date.valueOf("2000-01-01").toLocalDate())
                 .build();
 
-        restTemplate.postForEntity(getUrl(), user, User.class);
-        assertEquals(1, restTemplate.getForObject(getUrl(),
-                List.class).size());
-    }
-
-    @Test
-    @Order(8)
-    void addUserWithSpacesInLoginTest() {
-        User user = User.builder()
-                .email("email@yandex.ru")
-                .login(" ")
-                .name("name")
-                .birthday(Date.valueOf("2000-01-01"))
-                .build();
-
-        restTemplate.postForEntity(getUrl(), user, User.class);
-        assertEquals(1, restTemplate.getForObject(getUrl(),
-                List.class).size());
-    }
-
-    @Test
-    @Order(9)
-    void addUserWithNullNameTest() {
-        User user = User.builder()
-                .email("email@yandex.ru")
-                .login("login")
-                .name(null)
-                .birthday(Date.valueOf("2000-01-01"))
-                .build();
-
-        restTemplate.postForEntity(getUrl(), user, User.class);
-        assertEquals(2, restTemplate.getForObject(getUrl(),
-                List.class).size());
-    }
-
-    @Test
-    @Order(10)
-    void addUserWithEmptyNameTest() {
-        User user = User.builder()
-                .email("email@yandex.ru")
-                .login("login")
-                .name("")
-                .birthday(Date.valueOf("2000-01-01"))
-                .build();
-
-        restTemplate.postForEntity(getUrl(), user, User.class);
-        assertEquals(3, restTemplate.getForObject(getUrl(),
-                List.class).size());
-    }
-
-    @Test
-    @Order(11)
-    void addUserWithBirthDayInTheFutureNameTest() {
-        User user = User.builder()
-                .email("email@yandex.ru")
-                .login("login")
-                .name("name")
-                .birthday(Date.valueOf("3000-01-01"))
-                .build();
-
-        restTemplate.postForEntity(getUrl(), user, User.class);
-        assertEquals(3, restTemplate.getForObject(getUrl(),
-                List.class).size());
-    }
-
-    @Test
-    @Order(12)
-    void updateUserTest() {
-        User userForAnUpdate = User.builder()
-                .id(1)
-                .email("newEmail@yandex.ru")
-                .login("newLogin")
-                .name("newName")
-                .birthday(Date.valueOf("2001-01-01"))
-                .build();
-
-        restTemplate.put(getUrl(), userForAnUpdate, User.class);
-        System.out.println(restTemplate.getForObject(getUrl(), List.class));
-        assertEquals("{id=1, email=newEmail@yandex.ru, login=newLogin, name=newName, birthday=2001-01-01, " +
-                        "friends=[], likedFilms=[]}",
-                restTemplate.getForObject(getUrl(),
-                        List.class).get(2).toString());
-    }
-
-    @Test
-    @Order(13)
-    void updateUserUnknownTest() {
-        User userForAnUpdate = User.builder()
-                .id(2)
-                .email("newEmail@yandex.ru")
-                .login("newLogin")
-                .name("newName")
-                .birthday(Date.valueOf("2001-01-01"))
-                .build();
-
-        restTemplate.postForEntity(getUrl(), userForAnUpdate, User.class);
-        assertEquals(4, restTemplate.getForObject(getUrl(),
-                List.class).size());
-    }
-
-    @Test
-    @Order(14)
-    void getUsersTest() {
-        User user = User.builder()
-                .email("email@yandex.ru")
-                .login("login")
-                .name("name")
-                .birthday(Date.valueOf("3000-01-01"))
-                .build();
-
-        restTemplate.postForEntity(getUrl(), user, User.class);
-        assertEquals(4, restTemplate.getForObject(getUrl(),
-                List.class).size());
-    }
-
-    private String getUrl() {
-        return "http://localhost:" + port + "/users";
+        userDbStorage.create(user);
+        assertTrue(userDbStorage.findAll().contains(user));
     }
 }

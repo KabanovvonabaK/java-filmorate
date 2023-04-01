@@ -1,8 +1,5 @@
 # java-filmorate
-Template repository for Filmorate project.
-![DB_scheme](https://user-images.githubusercontent.com/114878995/226187909-591fd788-316b-4be2-b4ca-37cafb37ab5c.png)
-
-*Комментарий:* в данной реализации не очень нравится что Friendship, Likes и Film_Genres по сути помойки.
+![](../../../Downloads/Untitled.png)
 
 *Примеры запросов:* за основу взяты фильмы, для пользователей будет очень похоже
 1. Все фильмы SELECT * FROM Films;

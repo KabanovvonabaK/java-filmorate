@@ -2,73 +2,39 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.UserAlreadyLikedFilm;
-import ru.yandex.practicum.filmorate.exceptions.UserNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.UserNotLikedThisFilm;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.Storage;
+import ru.yandex.practicum.filmorate.storage.db.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.db.UserDbStorage;
 
-import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
 @Service
 public class FilmService {
 
-    final Storage<Film> filmStorage;
-    final Storage<User> userStorage;
+    final FilmDbStorage filmStorage;
+    final UserDbStorage userStorage;
 
     @Autowired
-    public FilmService(Storage<Film> filmStorage, Storage<User> userStorage) {
+    public FilmService(@Qualifier("dbFilmStorage") FilmDbStorage filmStorage,
+                       @Qualifier("dbUserStorage") UserDbStorage userStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
     }
 
 
     public void addLike(int filmId, int userId) {
-        if (!checkFilmExist(filmId)) {
-            throw new FilmNotFoundException(filmId);
-        }
-        if (!checkUserExist(userId)) {
-            throw new UserNotFoundException(userId);
-        }
-        if (!userStorage.findById(userId).getLikedFilms().contains(filmId)) {
-            Film film = filmStorage.findById(filmId);
-            filmStorage.findById(filmId).setRate(film.getRate() + 1);
-            userStorage.findById(userId).getLikedFilms().add(filmId);
-            log.info("User with id {} like film with id {}", userId, filmId);
-        } else {
-            throw new UserAlreadyLikedFilm(filmId, userId);
-        }
+        filmStorage.addLike(filmId, userId);
     }
 
-    public void removeLike(int id, int userId) {
-        if (!checkFilmExist(id)) {
-            throw new FilmNotFoundException(id);
-        }
-        if (!checkUserExist(userId)) {
-            throw new UserNotFoundException(userId);
-        }
-        if (userStorage.findById(userId).getLikedFilms().contains(id)) {
-            Film film = filmStorage.findById(id);
-            filmStorage.findById(id).setRate(film.getRate() - 1);
-            userStorage.findById(userId).getLikedFilms().remove(id);
-            log.info("User with id {} remove like from film with id {}", userId, id);
-        } else {
-            throw new UserNotLikedThisFilm(id, userId);
-        }
+    public void removeLike(int filmId, int userId) {
+        filmStorage.removeLike(userId, filmId);
     }
 
     public List<Film> getTopFilms(int count) {
-        List<Film> films = filmStorage.findAll();
-        films.sort(Comparator.comparingInt(Film::getRate).reversed());
-        if (count < films.size()) {
-            films = films.subList(0, count);
-        }
-        return films;
+        return filmStorage.getTopFilms(count);
     }
 
     public List<Film> getAllFilms() {
@@ -85,23 +51,5 @@ public class FilmService {
 
     public Film updateFilm(Film film) {
         return filmStorage.update(film);
-    }
-
-    private boolean checkFilmExist(int id) {
-        for (Film film : filmStorage.findAll()) {
-            if (film.getId() == id) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean checkUserExist(int id) {
-        for (User user : userStorage.findAll()) {
-            if (user.getId() == id) {
-                return true;
-            }
-        }
-        return false;
     }
 }
