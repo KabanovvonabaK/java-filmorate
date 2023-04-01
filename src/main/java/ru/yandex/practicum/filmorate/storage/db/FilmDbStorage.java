@@ -159,8 +159,8 @@ public class FilmDbStorage implements Storage<Film> {
 
     private void checkMPAExist(int mpaId) {
         String query = "SELECT * FROM MPA WHERE mpa_id = ?;";
-        SqlRowSet mpa_ids = jdbcTemplate.queryForRowSet(query, mpaId);
-        if (!mpa_ids.next()) {
+        SqlRowSet mpaIds = jdbcTemplate.queryForRowSet(query, mpaId);
+        if (!mpaIds.next()) {
             throw new MPANotFoundException(mpaId);
         }
     }
