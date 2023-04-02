@@ -1,9 +1,6 @@
 # java-filmorate
-Template repository for Filmorate project.
-![DB_scheme](https://user-images.githubusercontent.com/114878995/226187909-591fd788-316b-4be2-b4ca-37cafb37ab5c.png)
-
-*Комментарий:* в данной реализации не очень нравится что Friendship, Likes и Film_Genres по сути помойки.
-
+https://dbdiagram.io/d/64170640296d97641d890f97
+![](DBSchemeDiagram.png)
 *Примеры запросов:* за основу взяты фильмы, для пользователей будет очень похоже
 1. Все фильмы SELECT * FROM Films;
 2. Найти фильм по id SELECT * FROM Films WHERE film_id = id;

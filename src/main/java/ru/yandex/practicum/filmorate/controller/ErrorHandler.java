@@ -42,4 +42,16 @@ public class ErrorHandler {
         return new ErrorResponse(String.format("User with id %s not liked film with id %s",
                 e.getUserId(), e.getFilmId()));
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleMPANotFound(final MPANotFoundException e) {
+        return new ErrorResponse(String.format("MPA with id %s not found", e.getMpaId()));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleGenreNotFound(final GenreNotFoundException e) {
+        return new ErrorResponse(String.format("Genre with id %s not found", e.getGenreId()));
+    }
 }
